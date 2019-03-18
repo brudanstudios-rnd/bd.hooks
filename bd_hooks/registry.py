@@ -4,9 +4,45 @@ import weakref
 import types
 import logging
 
-from .exceptions import InvalidCallbackError, HookNotFoundError, HookCallbackDeadError
+from .exceptions import \
+    InvalidCallbackError, \
+    HookNotFoundError, \
+    HookCallbackDeadError, \
+    CallbackExecutionError
 
 LOGGER = logging.getLogger(__name__)
+
+
+class HookItem(object):
+
+    def __init__(self, callback, priority=50):
+        if isinstance(callback, types.FunctionType):
+            self._callback = callback
+            self._obj_weakref = None
+        else:
+            self._callback = callback.im_func
+            self._obj_weakref = weakref.ref(callback.im_self)
+        self._priority = priority
+
+    @property
+    def priority(self):
+        return self._priority
+
+    def execute(self, *args, **kwargs):
+        try:
+            if self._obj_weakref is None:  # is a function
+                return self._callback(*args, **kwargs)
+            else:
+                return self._callback(self._obj_weakref(), *args, **kwargs)
+        except Exception as e:
+            raise CallbackExecutionError(details={"hook_name": self._hook_name,
+                                                  "callback": str(self._callback),
+                                                  "exc_msg": str(e)})
+
+    def is_alive(self):
+        if self._obj_weakref is not None and self._obj_weakref() is None:
+            return False
+        return True
 
 
 class HookRegistry(object):
@@ -14,31 +50,17 @@ class HookRegistry(object):
     def __init__(self):
         self._hooks = {}
         self._sorted = set()
-        self._forced_solo = set()
 
-    def add_hook(self, name, callback, priority=50, force_solo=False):
+    def add_hook(self, name, callback, priority=50):
         if not callable(callback):
             raise InvalidCallbackError(details={"hook_name": name,
                                                 "callback": str(callback)})
 
-        if not force_solo and name in self._forced_solo:
-            return
-
         LOGGER.debug("Adding hook: {} ...".format(name))
 
-        if force_solo:
-            self._forced_solo.add(name)
-            hooks = []
-        else:
-            hooks = self._hooks.get(name, [])
+        hooks = self._hooks.get(name, [])
 
-        if isinstance(callback, types.FunctionType):
-            hook = (priority, callback, None)
-        else:
-            hook = (priority, callback.im_func,
-                    weakref.ref(callback.im_self))
-
-        hooks.append(hook)
+        hooks.append(HookItem(callback, priority))
 
         self._hooks[name] = hooks
 
@@ -50,13 +72,22 @@ class HookRegistry(object):
         if not hooks:
             raise HookNotFoundError(details={"hook_name": name})
 
+        self._cleanup(name)
+
+        if name not in self._sorted:
+            hooks.sort(key=lambda h: h.priority, reverse=True)
+            self._sorted.add(name)
+
+        return hooks
+
+    def _cleanup(self, name):
+        hooks = self._hooks.get(name)
+
         # remove all the method callbacks bound to the deleted objects
         for i in range(len(hooks)-1, -1, -1):
 
-            _, callback, obj_weakref = hooks[i]
-
             # chech if it is a method and the owner is dead
-            if obj_weakref is not None and obj_weakref() is None:
+            if not hooks[i].is_alive():
                 del hooks[i]
 
         # remove this hook from the registry
@@ -65,12 +96,4 @@ class HookRegistry(object):
             del self._hooks[name]
             if name in self._sorted:
                 self._sorted.remove(name)
-            if name in self._forced_solo:
-                self._forced_solo.remove(name)
             raise HookCallbackDeadError(details={"hook_name": name})
-
-        if name not in self._sorted:
-            hooks.sort(key=lambda x: x[0], reverse=True)
-            self._sorted.add(name)
-
-        return hooks
