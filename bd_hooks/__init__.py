@@ -10,11 +10,12 @@ this = sys.modules[__name__]
 this._registry = None
 
 
-def load_hooks(hook_search_paths=None, loader=HookLoader):
+def load_hooks(hook_search_paths=None):
     if this._registry is None:
         this._registry = HookRegistry()
-        loader.load(this._registry, hook_search_paths)
+        HookLoader.load(this._registry, hook_search_paths)
 
 
 def execute(hook_name, *args, **kwargs):
-    return HookExecutor(this._registry, hook_name, *args, **kwargs)
+    hook_items = this._registry.get_hooks(hook_name)
+    return HookExecutor(hook_items, *args, **kwargs)

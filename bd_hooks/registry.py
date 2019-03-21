@@ -73,7 +73,6 @@ class HookRegistry(object):
 
     def get_hooks(self, name):
         hooks = self._hooks.get(name)
-
         if not hooks:
             raise HookNotFoundError(details={"hook_name": name})
 

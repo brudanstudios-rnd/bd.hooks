@@ -37,17 +37,9 @@ class InvalidCallbackError(HookError):
     default_message = "Invalid callback '{callback}' provided for '{hook_name}' hook"
 
 
-class SearchPathsNotDefinedError(HookError):
+class SearchPathsNotFoundError(HookError):
     default_message = "Hook search paths are not provided. " \
               "Check if 'BD_HOOKPATH' environment variable exists"
-
-
-class HookLoadingError(HookError):
-    default_message = "Hook '{path}' failed to load. {exc_msg}"
-
-
-class HookRegistrationError(HookError):
-    default_message = "Failed to register hook from '{path}'. {exc_msg}"
 
 
 class CallbackExecutionError(HookError):
