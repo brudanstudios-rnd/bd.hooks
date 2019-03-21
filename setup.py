@@ -7,6 +7,6 @@ setup(
     long_description='',
     author='Heorhi Samushyia',
     packages=find_packages(),
-    install_requires=["boto3", "QtAwesome", "metayaml", "pluginbase"],
+    install_requires=["pluginbase"],
     zip_safe=False
 )

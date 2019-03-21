@@ -20,3 +20,6 @@ build/
 
 # pytest
 .pytest_cache/
+
+# tox
+.tox/

@@ -15,14 +15,15 @@ LOGGER = logging.getLogger(__name__)
 
 class HookItem(object):
 
-    def __init__(self, callback, priority=50):
-        if isinstance(callback, types.FunctionType):
-            self._callback = callback
-            self._obj_weakref = None
-        else:
+    def __init__(self, name, callback, priority=50):
+        self._name = name
+        self._obj_weakref = None
+        self._callback = callback
+        self._priority = priority
+
+        if isinstance(callback, types.MethodType):
             self._callback = callback.im_func
             self._obj_weakref = weakref.ref(callback.im_self)
-        self._priority = priority
 
     @property
     def priority(self):
@@ -35,13 +36,17 @@ class HookItem(object):
             else:
                 return self._callback(self._obj_weakref(), *args, **kwargs)
         except Exception as e:
-            raise CallbackExecutionError(details={"hook_name": self._hook_name,
+            raise CallbackExecutionError(details={"hook_name": self._name,
                                                   "callback": str(self._callback),
                                                   "exc_msg": str(e)})
 
-    def is_alive(self):
+    def is_valid(self):
         if self._obj_weakref is not None and self._obj_weakref() is None:
             return False
+
+        if self._callback is None:
+            return False
+
         return True
 
 
@@ -60,7 +65,7 @@ class HookRegistry(object):
 
         hooks = self._hooks.get(name, [])
 
-        hooks.append(HookItem(callback, priority))
+        hooks.append(HookItem(name, callback, priority))
 
         self._hooks[name] = hooks
 
@@ -87,7 +92,7 @@ class HookRegistry(object):
         for i in range(len(hooks)-1, -1, -1):
 
             # chech if it is a method and the owner is dead
-            if not hooks[i].is_alive():
+            if not hooks[i].is_valid():
                 del hooks[i]
 
         # remove this hook from the registry

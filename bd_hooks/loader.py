@@ -15,9 +15,7 @@ def get_searchpath(path):
     paths = [path]
 
     for entry in os.listdir(path):
-
         entry_path = os.path.join(path, entry)
-
         if not os.path.isdir(entry_path):
             continue
 
