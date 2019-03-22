@@ -3,9 +3,8 @@ __all__ = ["HookLoader"]
 import os
 import logging
 
+import six
 from pluginbase import PluginBase
-
-from .exceptions import *
 
 LOGGER = logging.getLogger(__name__)
 
@@ -33,7 +32,7 @@ class HookLoader(object):
         if hook_search_paths is None:
             hook_search_paths = []
 
-        hook_search_paths = map(str, hook_search_paths)
+        hook_search_paths = list(six.moves.map(str, hook_search_paths))
 
         BD_HOOKPATH = os.getenv("BD_HOOKPATH")
         if BD_HOOKPATH:
@@ -46,7 +45,7 @@ class HookLoader(object):
             )
             return
 
-        existing_hook_search_paths = filter(os.path.exists, hook_search_paths)
+        existing_hook_search_paths = list(six.moves.filter(os.path.exists, hook_search_paths))
 
         if not existing_hook_search_paths:
             LOGGER.warning(

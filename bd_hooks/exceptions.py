@@ -1,6 +1,8 @@
 import sys
 import traceback
 
+import six
+
 
 class Error(Exception):
 
@@ -22,9 +24,7 @@ class Error(Exception):
 
     def __str__(self):
         details = {}
-        for key, value in self.details.iteritems():
-            if isinstance(value, unicode):
-                value = value.encode(sys.getfilesystemencoding())
+        for key, value in six.iteritems(self.details):
             details[key] = value
         return str(self.message.format(**details))
 

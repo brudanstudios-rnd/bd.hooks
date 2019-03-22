@@ -1,4 +1,4 @@
-__all__ = ["load_hooks", "execute"]
+__all__ = ["load", "execute"]
 
 import sys
 
@@ -10,7 +10,7 @@ this = sys.modules[__name__]
 this._registry = None
 
 
-def load_hooks(hook_search_paths=None):
+def load(hook_search_paths=None):
     if this._registry is None:
         this._registry = HookRegistry()
         HookLoader.load(this._registry, hook_search_paths)

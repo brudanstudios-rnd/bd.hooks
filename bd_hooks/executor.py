@@ -1,5 +1,8 @@
 import logging
 
+from .exceptions import *
+
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -10,13 +13,19 @@ class HookExecutor(object):
         self._args = args
         self._kwargs = kwargs
 
-    def all(self, result_callback=None):
+    def all(self, result_callback=None, safe_execute=False):
         for hook_item in self._hook_items:
+            try:
+                result = hook_item.execute(*self._args, **self._kwargs)
+            except CallbackExecutionError as e:
+                if safe_execute:
+                    LOGGER.warning(e)
+                else:
+                    raise
 
-            result = hook_item.execute(*self._args, **self._kwargs)
-
-            if result_callback:
-                result_callback(result)
+            else:
+                if result_callback:
+                    result_callback(result)
 
     def one(self):
         return self._hook_items[0].execute(*self._args, **self._kwargs)

@@ -3,7 +3,6 @@ import pytest
 import mock
 
 from bd_hooks import loader
-from bd_hooks.exceptions import *
 
 
 class GetSearchPathTests:
@@ -47,14 +46,14 @@ class HookLoaderTests:
             mock_makepluginsource.return_value = mock_pluginsource
 
             search_paths = [os.path.join('a', 'b', 'c'), os.path.join('d', 'e', 'f')]
-            map(fs.create_dir, search_paths)
+            list(map(fs.create_dir, search_paths))
 
             with mock.patch('bd_hooks.loader.os.getenv', return_value=os.pathsep.join(search_paths)) as mock_getenv:
                 loader.HookLoader.load(None)
 
             mock_getenv.assert_called_once_with('BD_HOOKPATH')
             mock_makepluginsource.assert_called_with(
-                searchpath= search_paths
+                searchpath=search_paths
             )
 
         def test_returns_none_on_non_existing_search_paths(self, fs):
@@ -70,36 +69,112 @@ class HookLoaderTests:
             mock_makepluginsource.return_value = mock_pluginsource
 
             search_paths = [os.path.join('a', 'b', 'c'), os.path.join('d', 'e', 'f')]
-            map(fs.create_dir, search_paths)
+            list(map(fs.create_dir, search_paths))
 
             with mock.patch('bd_hooks.loader.get_searchpath', side_effect=[OSError, [search_paths[1]]]) as mock_getsearchpath:
                 result = loader.HookLoader.load(None, search_paths)
 
             assert result is None
-            mock_getsearchpath.assert_has_calls(map(mock.call, search_paths))
+            mock_getsearchpath.assert_has_calls(list(map(mock.call, search_paths)))
             assert mock_getsearchpath.call_count == 2
             mock_makepluginsource.assert_called_with(
                 searchpath=[search_paths[1]]
             )
 
-        def test_loads_plugins(self, fs):
-            search_paths = [os.path.join('a', 'b', 'c'), os.path.join('d', 'e', 'f')]
-            map(fs.create_dir, search_paths)
+        def test_loads_plugins(self, temp_dir_creator):
+            search_paths = [temp_dir_creator(), temp_dir_creator()]
 
-            plugin_paths = []
             for i, search_path in enumerate(search_paths):
                 plugin_path = os.path.join(search_path, 'plugin_{}.py'.format(i))
-                fs.create_file(
-                    plugin_path,
-                    contents=(
+                with open(plugin_path, 'w') as f:
+                    f.write(
                         '\n'
                         'def register(registry):\n'
                         '    registry("plugin_{}")\n'.format(i)
                     )
-                )
-                plugin_paths.append(plugin_path)
 
             mock_registry = mock.Mock()
+
             loader.HookLoader.load(mock_registry, search_paths)
+
             mock_registry.assert_called()
-            # mock_registry.assert_has_calls(mock.call('plugin_1'), mock.call('plugin_2'))
+            assert mock_registry.call_count == 2
+            mock_registry.assert_has_calls([mock.call('plugin_0'), mock.call('plugin_1')])
+
+        def test_skips_failed_to_load_plugins(self, temp_dir_creator):
+            search_paths = [temp_dir_creator(), temp_dir_creator()]
+
+            plugin_path = os.path.join(search_paths[0], 'plugin_0.py')
+            with open(plugin_path, 'w') as f:
+                # making syntax error
+                f.write(
+                    '\n'
+                    'def register(registry):\n'
+                    '    registry(")\n'
+                )
+
+            plugin_path = os.path.join(search_paths[1], 'plugin_1.py')
+            with open(plugin_path, 'w') as f:
+                f.write(
+                    '\n'
+                    'def register(registry):\n'
+                    '    registry("plugin_1")\n'
+                )
+
+            mock_registry = mock.Mock()
+
+            loader.HookLoader.load(mock_registry, search_paths)
+
+            mock_registry.assert_called_once_with('plugin_1')
+
+        def test_skips_plugins_with_no_register_function(self, temp_dir_creator):
+            search_paths = [temp_dir_creator(), temp_dir_creator()]
+
+            plugin_path = os.path.join(search_paths[0], 'plugin_0.py')
+            with open(plugin_path, 'w') as f:
+                # making mistake in function name
+                f.write(
+                    '\n'
+                    'def n_register(registry):\n'
+                    '    registry("plugin_0")\n'
+                )
+
+            plugin_path = os.path.join(search_paths[1], 'plugin_1.py')
+            with open(plugin_path, 'w') as f:
+                f.write(
+                    '\n'
+                    'def register(registry):\n'
+                    '    registry("plugin_1")\n'
+                )
+
+            mock_registry = mock.Mock()
+
+            loader.HookLoader.load(mock_registry, search_paths)
+
+            mock_registry.assert_called_once_with('plugin_1')
+
+        def test_skips_failed_to_registed_plugins(self, temp_dir_creator):
+            search_paths = [temp_dir_creator(), temp_dir_creator()]
+
+            plugin_path = os.path.join(search_paths[0], 'plugin_0.py')
+            with open(plugin_path, 'w') as f:
+                # making mistake in function name
+                f.write(
+                    '\n'
+                    'def register(registry):\n'
+                    '    raise Exception()\n'
+                )
+
+            plugin_path = os.path.join(search_paths[1], 'plugin_1.py')
+            with open(plugin_path, 'w') as f:
+                f.write(
+                    '\n'
+                    'def register(registry):\n'
+                    '    registry("plugin_1")\n'
+                )
+
+            mock_registry = mock.Mock()
+
+            loader.HookLoader.load(mock_registry, search_paths)
+
+            mock_registry.assert_called_once_with('plugin_1')
