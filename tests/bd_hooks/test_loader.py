@@ -53,7 +53,8 @@ class HookLoaderTests:
 
             mock_getenv.assert_called_once_with('BD_HOOKPATH')
             mock_makepluginsource.assert_called_with(
-                searchpath=search_paths
+                searchpath=search_paths,
+                persist=True
             )
 
         def test_returns_none_on_non_existing_search_paths(self, fs):
@@ -78,7 +79,8 @@ class HookLoaderTests:
             mock_getsearchpath.assert_has_calls(list(map(mock.call, search_paths)))
             assert mock_getsearchpath.call_count == 2
             mock_makepluginsource.assert_called_with(
-                searchpath=[search_paths[1]]
+                searchpath=[search_paths[1]],
+                persist=True
             )
 
         def test_loads_plugins(self, temp_dir_creator):

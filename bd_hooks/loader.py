@@ -25,8 +25,6 @@ def get_searchpath(path):
 
 class HookLoader(object):
 
-    _plugin_source = None
-
     @classmethod
     def load(cls, registry, hook_search_paths=None):
         if hook_search_paths is None:
@@ -70,11 +68,14 @@ class HookLoader(object):
 
         plugin_base = PluginBase(package="bd_hooks")
 
-        cls._plugin_source = plugin_base.make_plugin_source(searchpath=deep_search_paths)
+        plugin_source = plugin_base.make_plugin_source(
+            searchpath=deep_search_paths,
+            persist=True
+        )
 
-        for plugin_name in cls._plugin_source.list_plugins():
+        for plugin_name in plugin_source.list_plugins():
             try:
-                plugin = cls._plugin_source.load_plugin(plugin_name)
+                plugin = plugin_source.load_plugin(plugin_name)
             except Exception as e:
                 LOGGER.warning(
                     'Hook \'{path}\' failed to load. {exc_msg}'.format(

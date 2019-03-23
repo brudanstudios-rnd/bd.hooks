@@ -1,4 +1,5 @@
 import os
+import logging
 import bd_hooks
 
 import pytest
@@ -32,7 +33,7 @@ class LoadTests:
         assert bd_hooks._registry is mock_registry
 
 
-def test_successfully_loads_and_executes_hooks(temp_dir_creator, clean_module):
+def test_successfully_loads_and_executes_hooks(temp_dir_creator, clean_module, caplog):
     search_paths = [temp_dir_creator(), temp_dir_creator()]
 
     plugin_path = os.path.join(search_paths[0], 'plugin_0.py')
@@ -51,16 +52,25 @@ def test_successfully_loads_and_executes_hooks(temp_dir_creator, clean_module):
     with open(plugin_path, 'w') as f:
         f.write(
             '\n'
-            'def action_2():\n'
-            '    return "action_2"\n'
+            'class Hook(object):\n'
+            '    def action_2(self):\n'
+            '        return "action_2"\n'
+            '\n'
             '\n'
             'def register(registry):\n'
-            '    registry.add_hook("test_hook", action_2)\n'
+            '    hook = Hook()\n'
+            '    registry.add_hook("test_hook", hook.action_2)\n'
         )
 
     bd_hooks.load(search_paths)
 
+    caplog.set_level(logging.DEBUG, logger=bd_hooks.registry.LOGGER.name)
+
     hook_items = bd_hooks._registry.get_hooks('test_hook')
+
+    for record in caplog.records:
+        assert record.levelname != 'ERROR'
+
     assert len(hook_items) == 2
 
     executor = bd_hooks.execute('test_hook')
