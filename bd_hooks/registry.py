@@ -5,7 +5,6 @@ import logging
 from .exceptions import \
     InvalidCallbackError, \
     HookNotFoundError, \
-    HookCallbackDeadError, \
     CallbackExecutionError
 
 LOGGER = logging.getLogger(__name__)
