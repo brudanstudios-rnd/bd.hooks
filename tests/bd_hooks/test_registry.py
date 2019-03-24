@@ -130,7 +130,7 @@ class HookItemTests:
             hook_item = registry.HookItem('test_hook', mock_callback)
 
             assert isinstance(hook_item, registry.HookItem)
-            assert hook_item._name == 'test_hook'
+            assert hook_item._hook_name == 'test_hook'
             assert hook_item._callback is mock_callback
 
     class ExecuteTests:

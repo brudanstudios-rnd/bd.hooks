@@ -36,7 +36,7 @@ class HookLoaderTests:
     class LoadTests:
 
         def test_returns_none_on_missing_search_paths(self):
-            result = loader.HookLoader.load(None)
+            result = loader.load(None)
             assert result is None
 
         @mock.patch.object(loader.PluginBase, 'make_plugin_source')
@@ -49,7 +49,7 @@ class HookLoaderTests:
             list(map(fs.create_dir, search_paths))
 
             with mock.patch('bd_hooks.loader.os.getenv', return_value=os.pathsep.join(search_paths)) as mock_getenv:
-                loader.HookLoader.load(None)
+                loader.load(None)
 
             mock_getenv.assert_called_once_with('BD_HOOKPATH')
             mock_makepluginsource.assert_called_with(
@@ -59,7 +59,7 @@ class HookLoaderTests:
 
         def test_returns_none_on_non_existing_search_paths(self, fs):
             search_paths = [os.path.join('a', 'b', 'c'), os.path.join('d', 'e', 'f')]
-            result = loader.HookLoader.load(None, search_paths)
+            result = loader.load(None, search_paths)
             assert result is None
 
         @mock.patch.object(loader.PluginBase, 'make_plugin_source')
@@ -73,7 +73,7 @@ class HookLoaderTests:
             list(map(fs.create_dir, search_paths))
 
             with mock.patch('bd_hooks.loader.get_searchpath', side_effect=[OSError, [search_paths[1]]]) as mock_getsearchpath:
-                result = loader.HookLoader.load(None, search_paths)
+                result = loader.load(None, search_paths)
 
             assert result is None
             mock_getsearchpath.assert_has_calls(list(map(mock.call, search_paths)))
@@ -97,7 +97,7 @@ class HookLoaderTests:
 
             mock_registry = mock.Mock()
 
-            loader.HookLoader.load(mock_registry, search_paths)
+            loader.load(mock_registry, search_paths)
 
             mock_registry.assert_called()
             assert mock_registry.call_count == 2
@@ -125,7 +125,7 @@ class HookLoaderTests:
 
             mock_registry = mock.Mock()
 
-            loader.HookLoader.load(mock_registry, search_paths)
+            loader.load(mock_registry, search_paths)
 
             mock_registry.assert_called_once_with('plugin_1')
 
@@ -151,7 +151,7 @@ class HookLoaderTests:
 
             mock_registry = mock.Mock()
 
-            loader.HookLoader.load(mock_registry, search_paths)
+            loader.load(mock_registry, search_paths)
 
             mock_registry.assert_called_once_with('plugin_1')
 
@@ -177,6 +177,6 @@ class HookLoaderTests:
 
             mock_registry = mock.Mock()
 
-            loader.HookLoader.load(mock_registry, search_paths)
+            loader.load(mock_registry, search_paths)
 
             mock_registry.assert_called_once_with('plugin_1')

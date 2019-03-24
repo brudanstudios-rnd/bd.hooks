@@ -14,22 +14,22 @@ def clean_module():
 
 class LoadTests:
 
-    @mock.patch('bd_hooks.HookLoader', spec_set=True)
-    @mock.patch('bd_hooks.HookRegistry', spec_set=True)
-    def test_loads_only_once(self, mock_registry_init, mock_hookloader, clean_module):
+    @mock.patch('bd_hooks.loader.load', spec_set=True)
+    @mock.patch('bd_hooks.registry.HookRegistry', spec_set=True)
+    def test_loads_only_once(self, mock_registry_init, mock_hookload, clean_module):
         mock_registry = mock.Mock()
         mock_registry_init.return_value = mock_registry
 
         bd_hooks.load()
 
         mock_registry_init.assert_called_once()
-        mock_hookloader.load.assert_called_once_with(mock_registry, None)
+        mock_hookload.assert_called_once_with(mock_registry, None)
         assert bd_hooks._registry is mock_registry
 
         bd_hooks.load()
 
         mock_registry_init.assert_called_once()
-        mock_hookloader.load.assert_called_once()
+        mock_hookload.assert_called_once()
         assert bd_hooks._registry is mock_registry
 
 
