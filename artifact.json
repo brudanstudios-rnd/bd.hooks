@@ -2,5 +2,9 @@
   "category": "package",
   "author": "Heorhi Samushyia",
   "description": "This package allows to extend the core functionality using hooks.",
+  "requires": [
+    "pluginbase",
+    "six"
+  ],
   "compiled": false
 }
