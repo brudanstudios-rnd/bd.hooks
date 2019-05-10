@@ -6,7 +6,7 @@ import logging
 import six
 from pluginbase import PluginBase
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('bd.' + __name__)
 
 
 def get_searchpath(root_dir):

@@ -7,7 +7,7 @@ from .exceptions import \
     HookNotFoundError, \
     CallbackExecutionError
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('bd.' + __name__)
 
 
 class HookItem(object):

@@ -3,7 +3,7 @@ import logging
 from .exceptions import CallbackExecutionError
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('bd.' + __name__)
 
 
 class HookExecutor(object):
