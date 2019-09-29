@@ -1,6 +1,6 @@
 import os
 import logging
-import bd_hooks
+from bd import hooks
 
 import pytest
 import mock
@@ -8,29 +8,29 @@ import mock
 
 @pytest.fixture
 def clean_module():
-    bd_hooks._registry = None
+    hooks._registry = None
     return
 
 
 class LoadTests:
 
-    @mock.patch('bd_hooks.loader.load', spec_set=True)
-    @mock.patch('bd_hooks.registry.HookRegistry', spec_set=True)
+    @mock.patch('bd.hooks.loader.load', spec_set=True)
+    @mock.patch('bd.hooks.registry.HookRegistry', spec_set=True)
     def test_loads_only_once(self, mock_registry_init, mock_hookload, clean_module):
         mock_registry = mock.Mock()
         mock_registry_init.return_value = mock_registry
 
-        bd_hooks.load()
+        hooks.load()
 
         mock_registry_init.assert_called_once()
         mock_hookload.assert_called_once_with(mock_registry, None)
-        assert bd_hooks._registry is mock_registry
+        assert hooks._registry is mock_registry
 
-        bd_hooks.load()
+        hooks.load()
 
         mock_registry_init.assert_called_once()
         mock_hookload.assert_called_once()
-        assert bd_hooks._registry is mock_registry
+        assert hooks._registry is mock_registry
 
 
 def test_successfully_loads_and_executes_hooks(temp_dir_creator, clean_module, caplog):
@@ -62,18 +62,18 @@ def test_successfully_loads_and_executes_hooks(temp_dir_creator, clean_module, c
             '    registry.add_hook("test_hook", hook.action_2)\n'
         )
 
-    bd_hooks.load(search_paths)
+    hooks.load(search_paths)
 
-    caplog.set_level(logging.DEBUG, logger=bd_hooks.registry.LOGGER.name)
+    caplog.set_level(logging.DEBUG, logger=bd.hooks.registry.LOGGER.name)
 
-    hook_items = bd_hooks._registry.get_hooks('test_hook')
+    hook_items = hooks._registry.get_hooks('test_hook')
 
     for record in caplog.records:
         assert record.levelname != 'ERROR'
 
     assert len(hook_items) == 2
 
-    executor = bd_hooks.execute('test_hook')
+    executor = hooks.execute('test_hook')
 
     mock_result_callback = mock.Mock()
     executor.all(mock_result_callback)

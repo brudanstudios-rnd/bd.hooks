@@ -1,6 +1,5 @@
-import bd_hooks
-from bd_hooks.exceptions import CallbackExecutionError
-from bd_hooks.executor import HookExecutor
+from bd.hooks import CallbackExecutionError
+from bd.hooks import HookExecutor
 
 import pytest
 import mock
@@ -11,9 +10,9 @@ class HookExecutorTests:
 
         def test_executes_first_item(self):
             hook_items = [
-                mock.Mock(spec_set=bd_hooks.registry.HookItem),
-                mock.Mock(spec_set=bd_hooks.registry.HookItem),
-                mock.Mock(spec_set=bd_hooks.registry.HookItem)
+                mock.Mock(spec_set=bd.hooks.registry.HookItem),
+                mock.Mock(spec_set=bd.hooks.registry.HookItem),
+                mock.Mock(spec_set=bd.hooks.registry.HookItem)
             ]
             hook_executor = HookExecutor(hook_items)
 
@@ -24,7 +23,7 @@ class HookExecutorTests:
             hook_items[2].execute.assert_not_called()
 
         def test_passes_correct_arguments(self):
-            hook_items = [mock.Mock(spec_set=bd_hooks.registry.HookItem)]
+            hook_items = [mock.Mock(spec_set=bd.hooks.registry.HookItem)]
             hook_executor = HookExecutor(hook_items, 'a', 'b', a='a', b='b')
 
             hook_executor.one()
@@ -32,7 +31,7 @@ class HookExecutorTests:
             hook_items[0].execute.assert_called_once_with('a', 'b', a='a', b='b')
 
         def test_raises_error_on_execute_fail(self):
-            mock_hook_item = mock.Mock(spec_set=bd_hooks.registry.HookItem)
+            mock_hook_item = mock.Mock(spec_set=bd.hooks.registry.HookItem)
             mock_hook_item.execute.side_effect = Exception
 
             hook_executor = HookExecutor([mock_hook_item])
@@ -44,9 +43,9 @@ class HookExecutorTests:
 
         def test_executes_all_items(self):
             hook_items = [
-                mock.Mock(spec_set=bd_hooks.registry.HookItem),
-                mock.Mock(spec_set=bd_hooks.registry.HookItem),
-                mock.Mock(spec_set=bd_hooks.registry.HookItem)
+                mock.Mock(spec_set=bd.hooks.registry.HookItem),
+                mock.Mock(spec_set=bd.hooks.registry.HookItem),
+                mock.Mock(spec_set=bd.hooks.registry.HookItem)
             ]
             hook_executor = HookExecutor(hook_items)
 
@@ -56,7 +55,7 @@ class HookExecutorTests:
                 hook_item.execute.assert_called_once()
 
         def test_passes_correct_arguments(self):
-            hook_items = [mock.Mock(spec_set=bd_hooks.registry.HookItem)]
+            hook_items = [mock.Mock(spec_set=bd.hooks.registry.HookItem)]
             hook_executor = HookExecutor(hook_items, 'a', 'b', a='a', b='b')
 
             hook_executor.all()
@@ -64,7 +63,7 @@ class HookExecutorTests:
             hook_items[0].execute.assert_called_once_with('a', 'b', a='a', b='b')
 
         def test_calls_result_callback(self):
-            mock_hook_item = mock.Mock(spec_set=bd_hooks.registry.HookItem)
+            mock_hook_item = mock.Mock(spec_set=bd.hooks.registry.HookItem)
             mock_hook_item.execute.side_effect = ['a', 'b', 'c']
             hook_executor = HookExecutor([mock_hook_item, mock_hook_item, mock_hook_item])
 
@@ -77,7 +76,7 @@ class HookExecutorTests:
             )
 
         def test_raises_error_on_execute_fail(self):
-            mock_hook_item = mock.Mock(spec_set=bd_hooks.registry.HookItem)
+            mock_hook_item = mock.Mock(spec_set=bd.hooks.registry.HookItem)
             mock_hook_item.execute.side_effect = CallbackExecutionError(
                 details={
                     'hook_name': 'test_hook',
@@ -92,11 +91,11 @@ class HookExecutorTests:
                 hook_executor.all()
 
         @mock.patch(
-            'bd_hooks.registry.CallbackExecutionError',
+            'bd.hooks.registry.CallbackExecutionError',
             side_effect=Exception
         )
         def test_suppresses_error_when_safe_execute_is_true(self, mock_exception):
-            mock_hook_item = mock.Mock(spec_set=bd_hooks.registry.HookItem)
+            mock_hook_item = mock.Mock(spec_set=bd.hooks.registry.HookItem)
             mock_hook_item.execute.side_effect = [
                 'result',
                 CallbackExecutionError(

@@ -1,4 +1,4 @@
-from bd_hooks.exceptions import Error
+from bd.hooks import Error
 
 
 class ErrorTests:

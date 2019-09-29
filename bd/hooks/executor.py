@@ -3,7 +3,7 @@ import logging
 from .exceptions import CallbackExecutionError
 
 
-LOGGER = logging.getLogger('bd.' + __name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class HookExecutor(object):
@@ -13,7 +13,7 @@ class HookExecutor(object):
         """Constructor.
 
         Args:
-            hook_items (list[bd_hooks.registry.HookItem]):
+            hook_items (list[bd.hooks.registry.HookItem]):
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
 

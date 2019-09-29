@@ -6,7 +6,7 @@ import logging
 import six
 from pluginbase import PluginBase
 
-LOGGER = logging.getLogger('bd.' + __name__)
+LOGGER = logging.getLogger(__name__)
 
 
 def get_searchpath(root_dir):
@@ -38,7 +38,7 @@ def load(registry, hook_search_paths=None):
     """Find and register all the available hooks.
 
     Args:
-        registry (bd_hooks.registry.HookRegistry): Plugin registry object.
+        registry (bd.hooks.registry.HookRegistry): Plugin registry object.
         hook_search_paths (list[str]): A list of initial folders to search plugins at.
 
     """
@@ -85,7 +85,7 @@ def load(registry, hook_search_paths=None):
     if not deep_search_paths:
         return
 
-    plugin_base = PluginBase(package="bd_hooks")
+    plugin_base = PluginBase(package="bd.hooks")
 
     plugin_source = plugin_base.make_plugin_source(
         searchpath=deep_search_paths,

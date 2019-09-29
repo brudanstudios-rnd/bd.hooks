@@ -32,7 +32,7 @@ def execute(hook_name, *args, **kwargs):
         **kwargs: Arbitrary keyword arguments.
 
     Returns:
-        bd_hooks.executor.HookExecutor: hook executor object.
+        bd.hooks.executor.HookExecutor: hook executor object.
 
     """
     hook_items = this._registry.get_hooks(hook_name)

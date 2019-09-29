@@ -1,8 +1,7 @@
 import os
-import pytest
 import mock
 
-from bd_hooks import loader
+from bd.hooks import loader
 
 
 class GetSearchPathTests:
@@ -48,7 +47,7 @@ class HookLoaderTests:
             search_paths = [os.path.join('a', 'b', 'c'), os.path.join('d', 'e', 'f')]
             list(map(fs.create_dir, search_paths))
 
-            with mock.patch('bd_hooks.loader.os.getenv', return_value=os.pathsep.join(search_paths)) as mock_getenv:
+            with mock.patch('bd.hooks.loader.os.getenv', return_value=os.pathsep.join(search_paths)) as mock_getenv:
                 loader.load(None)
 
             mock_getenv.assert_called_once_with('BD_HOOKPATH')
@@ -72,7 +71,7 @@ class HookLoaderTests:
             search_paths = [os.path.join('a', 'b', 'c'), os.path.join('d', 'e', 'f')]
             list(map(fs.create_dir, search_paths))
 
-            with mock.patch('bd_hooks.loader.get_searchpath', side_effect=[OSError, [search_paths[1]]]) as mock_getsearchpath:
+            with mock.patch('bd.hooks.loader.get_searchpath', side_effect=[OSError, [search_paths[1]]]) as mock_getsearchpath:
                 result = loader.load(None, search_paths)
 
             assert result is None

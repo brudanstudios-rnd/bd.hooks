@@ -4,8 +4,7 @@ import copy
 import pytest
 import mock
 
-from bd_hooks import registry
-from bd_hooks import exceptions
+from bd.hooks import registry, exceptions
 
 
 @pytest.fixture(scope='function')
@@ -18,7 +17,7 @@ class HookRegistryTests:
     class AddHookTests:
 
         @mock.patch(
-            'bd_hooks.registry.InvalidCallbackError',
+            'bd.hooks.registry.InvalidCallbackError',
             side_effect=exceptions.InvalidCallbackError
         )
         def test_raises_error_on_invalid_provided_callback(self, mock_error, hook_registry):
@@ -28,7 +27,7 @@ class HookRegistryTests:
             mock_error.assert_called_once()
             mock_error.assert_called_once_with(details={'hook_name': 'test_hook', 'callback': 'non-callable-argument'})
 
-        @mock.patch('bd_hooks.registry.HookItem')
+        @mock.patch('bd.hooks.registry.HookItem')
         def test_adds_hook(self, mock_hook_init, hook_registry):
             mock_hook_item = mock.Mock(spec_set=registry.HookItem)
             mock_hook_init.return_value = mock_hook_item
@@ -40,7 +39,7 @@ class HookRegistryTests:
             assert 'test_hook' in hook_registry._data
             assert hook_registry._data['test_hook'] == [mock_hook_item]
 
-        @mock.patch('bd_hooks.registry.HookItem')
+        @mock.patch('bd.hooks.registry.HookItem')
         def test_passes_correct_priority_to_hook_item(self, mock_hook_init, hook_registry):
             mock_hook_item = mock.Mock()
             mock_hook_init.return_value = mock_hook_item
