@@ -1,10 +1,7 @@
-__all__ = ["load"]
-
 import os
 import logging
 
-import six
-from pluginbase import PluginBase
+from .vendor.pluginbase import PluginBase
 
 LOGGER = logging.getLogger(__name__)
 
@@ -46,7 +43,7 @@ def load(registry, hook_search_paths=None):
         hook_search_paths = []
 
     # convert all search paths to strings
-    hook_search_paths = list(six.moves.map(str, hook_search_paths))
+    hook_search_paths = list(map(str, hook_search_paths))
 
     # extract search paths from environment variable
     BD_HOOKPATH = os.getenv("BD_HOOKPATH")
@@ -61,7 +58,7 @@ def load(registry, hook_search_paths=None):
         return
 
     # keep only existing search paths
-    existing_hook_search_paths = list(six.moves.filter(os.path.exists, hook_search_paths))
+    existing_hook_search_paths = list(filter(os.path.exists, hook_search_paths))
 
     if not existing_hook_search_paths:
         LOGGER.warning(

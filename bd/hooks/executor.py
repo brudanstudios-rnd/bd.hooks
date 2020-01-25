@@ -7,7 +7,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class HookExecutor(object):
-    """This class allows the user to choose how to execute the hooks."""
+    """This class allows user to choose how to execute the hooks."""
 
     def __init__(self, hook_items, *args, **kwargs):
         """Constructor.
@@ -23,7 +23,7 @@ class HookExecutor(object):
         self._kwargs = kwargs
 
     def all(self, result_callback=None, safe_execute=False):
-        """Executes all the hook callbacks sequentially.
+        """Execute all the hook callbacks sequentially.
 
         Args:
             result_callback (callable): A callback to pass
@@ -49,7 +49,7 @@ class HookExecutor(object):
                     result_callback(result)
 
     def one(self):
-        """Executes only the first hook callback.
+        """Execute only the first hook callback.
 
         Returns:
             Return value from the executed callback.

@@ -1,8 +1,6 @@
 import sys
 import traceback
 
-import six
-
 
 class Error(Exception):
 
@@ -15,7 +13,7 @@ class Error(Exception):
 
     def __str__(self):
         details = {}
-        for key, value in six.iteritems(self.details):
+        for key, value in self.details.items():
             details[key] = value
         return str(self.message.format(**details))
 

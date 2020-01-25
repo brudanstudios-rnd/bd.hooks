@@ -4,22 +4,13 @@ __pycache__/
 !bin/**/.pyc
 *$py.class
 
-# Eclipse / PyDev projects
-.project
-.pydevproject
-.settings/
-.idea/
+.*/
+!.gitignore
 
 # virtual environment
-venv/
+venv*/
 
 # setuptools
 dist/
 build/
 *.egg-info/
-
-# pytest
-.pytest_cache/
-
-# tox
-.tox/
