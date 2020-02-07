@@ -1,7 +1,7 @@
 import os
 import logging
 
-from .vendor.pluginbase import PluginBase
+from ._vendor.pluginbase import PluginBase
 
 LOGGER = logging.getLogger(__name__)
 
