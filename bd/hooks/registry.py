@@ -1,6 +1,8 @@
 __all__ = ["HookRegistry"]
 
+import uuid
 import logging
+import inspect
 
 from .exceptions import \
     InvalidCallbackError, \
@@ -94,6 +96,9 @@ class HookRegistry(object):
                                                 "callback": str(callback)})
 
         LOGGER.debug("Adding hook: {} ...".format(name))
+
+        if inspect.isclass(callback):
+            callback.__name__ = '{0}__{1}'.format(callback.__name__, uuid.uuid4().hex)
 
         hooks = self._data.get(name, [])
 
