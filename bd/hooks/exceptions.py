@@ -1,3 +1,5 @@
+__all__ = ['HookError', 'HookNotFoundError', 'CallbackExecutionError', 'InvalidCallbackError']
+
 import sys
 import traceback
 
