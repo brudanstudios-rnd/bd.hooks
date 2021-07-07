@@ -24,6 +24,10 @@ class HookError(Error):
     pass
 
 
+class HooksNotLoadedError(HookError):
+    default_message = "Hook Registry not initialized. Possible cause: 'load' function not called. "
+
+
 class InvalidCallbackError(HookError):
     default_message = "Invalid callback '{callback}' provided for '{hook_name}' hook"
 

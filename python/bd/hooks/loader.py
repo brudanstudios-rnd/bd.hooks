@@ -31,7 +31,7 @@ def get_searchpath(root_dir):
     return paths
 
 
-def load(registry, hook_search_paths=None):
+def load(registry, hook_search_paths):
     """Find and register all the available hooks.
 
     Args:
@@ -39,21 +39,9 @@ def load(registry, hook_search_paths=None):
         hook_search_paths (list[str]): A list of initial folders to search plugins at.
 
     """
-    if hook_search_paths is None:
-        hook_search_paths = []
-
-    # convert all search paths to strings
-    hook_search_paths = list(map(str, hook_search_paths))
-
-    # extract search paths from environment variable
-    BD_HOOKPATH = os.getenv("BD_HOOKPATH")
-    if BD_HOOKPATH:
-        hook_search_paths.extend(BD_HOOKPATH.split(os.pathsep))
-
     if not hook_search_paths:
         LOGGER.warning(
-            'Hook search paths are not provided. '
-            'Check if \'BD_HOOKPATH\' environment variable exists'
+            'Hook search paths are not provided.'
         )
         return
 
