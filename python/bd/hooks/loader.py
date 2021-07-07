@@ -50,7 +50,7 @@ def load(registry, hook_search_paths):
 
     if not existing_hook_search_paths:
         LOGGER.warning(
-            'There are no existing search paths in the list: {}'.format(
+            'There is no existing search paths in the list: {}'.format(
                 existing_hook_search_paths
             )
         )

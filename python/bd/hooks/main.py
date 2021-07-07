@@ -42,7 +42,8 @@ def load(hook_search_paths=None):
 
         this._registry = registry.HookRegistry()
 
-    loader.load(this._registry, hook_search_paths)
+    if hook_search_paths:
+        loader.load(this._registry, hook_search_paths)
 
 
 def execute(hook_name, *args, **kwargs):
