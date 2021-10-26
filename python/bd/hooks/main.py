@@ -65,3 +65,7 @@ def execute(hook_name, *args, **kwargs):
 
     hook_items = this._registry.get_hooks(hook_name)
     return executor.HookExecutor(hook_items, *args, **kwargs)
+
+
+def get_active_registry():
+    return this._registry
