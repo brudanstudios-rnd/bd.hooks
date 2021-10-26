@@ -1,2 +1,2 @@
-from .main import load, execute
+from .main import load, execute, get_active_registry
 from .exceptions import *

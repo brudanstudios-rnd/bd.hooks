@@ -1,4 +1,4 @@
-__all__ = ["load", "execute"]
+__all__ = ["load", "execute", "get_active_registry"]
 
 import os
 import sys

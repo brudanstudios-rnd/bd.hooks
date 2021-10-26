@@ -1,6 +1,6 @@
 name = 'bd.hooks'
 
-version = 'v0.1.10'
+version = 'v0.1.11'
 
 build_command = 'python -m rezutil build {root}'
 private_build_requires = ["rezutil"]
