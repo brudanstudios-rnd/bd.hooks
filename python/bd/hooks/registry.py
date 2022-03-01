@@ -53,6 +53,8 @@ class HookItem(object):
         """
         try:
             return self._callback(*args, **kwargs)
+        except CallbackExecutionError as e:
+            raise
         except Exception as e:
             raise CallbackExecutionError(details={"hook_name": self._hook_name,
                                                   "callback": str(self._callback),
