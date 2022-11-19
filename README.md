@@ -1,4 +1,4 @@
-# bd-hooks
+# bd.hooks
 
 This package allows to extend API functionality using hook modules.
 
