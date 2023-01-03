@@ -1,8 +1,8 @@
-name = 'bd.hooks'
+name = "bd.hooks"
 
-version = 'v0.1.12'
+version = "v0.1.12"
 
-build_command = 'python -m rezutil build {root} --ignore ".lh,.vscode"'
+build_command = "python -m rezutil build {root}"
 private_build_requires = ["rezutil"]
 
 

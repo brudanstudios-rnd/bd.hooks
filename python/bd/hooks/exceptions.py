@@ -1,41 +1,42 @@
-__all__ = ['HookError', 'HookNotFoundError', 'CallbackExecutionError', 'InvalidCallbackError']
+__all__ = [
+    "HookError",
+    "HookNotFoundError",
+    "CallbackExecutionError",
+    "InvalidCallbackError",
+]
 
-import sys
-import traceback
+from typing import Any, Dict, Optional
 
 
-class Error(Exception):
+class HookError(Exception):
 
     default_message = "Unspecified error occurred"
 
-    def __init__(self, message=None, details=None):
+    def __init__(
+        self, message: Optional[str] = None, details: Optional[Dict[str, Any]] = None
+    ):
         self.message = message or self.default_message
         self.details = details or {}
-        self.traceback = traceback.format_exc()
 
     def __str__(self):
-        details = {}
-        for key, value in self.details.items():
-            details[key] = value
-        return str(self.message.format(**details))
-
-
-class HookError(Error):
-    pass
+        return str(self.message.format(**self.details))
 
 
 class HooksNotLoadedError(HookError):
-    default_message = "Hook Registry not initialized. Possible cause: 'load' function not called. "
+    default_message = (
+        "Hook Registry not initialized. Possible cause: 'load' function not called. "
+    )
 
 
 class InvalidCallbackError(HookError):
-    default_message = "Invalid callback '{callback}' provided for '{hook_name}' hook"
+    default_message = (
+        "Invalid callback '{module_path}:{callback}' provided for '{hook_uid}' hook"
+    )
 
 
 class CallbackExecutionError(HookError):
-    default_message = "Failed to execute callback '{callback}' for hook '{hook_name}'. {exc_msg}"
+    default_message = "Failed to execute '{hook_item}'. {source_exception}"
 
 
 class HookNotFoundError(HookError):
-    default_message = "Unable to find a hook '{hook_name}'"
-
+    default_message = "Unable to find a hook '{hook_uid}'"

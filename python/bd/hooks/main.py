@@ -7,9 +7,8 @@ import logging
 from . import registry, loader, executor
 from .exceptions import HooksNotLoadedError
 
-this = sys.modules[__name__]
-this._log = logging.getLogger(__name__)
-this._registry = None
+logger = logging.getLogger(__name__)
+_registry = None
 
 
 def load(hook_search_paths=None):
@@ -26,7 +25,9 @@ def load(hook_search_paths=None):
         # convert all search paths to strings
         hook_search_paths = list(map(str, hook_search_paths))
 
-    if this._registry is None:
+    global _registry
+
+    if _registry is None:
 
         # extract search paths from environment variable
         BD_HOOKPATH = os.getenv("BD_HOOKPATH")
@@ -34,25 +35,25 @@ def load(hook_search_paths=None):
             hook_search_paths.extend(BD_HOOKPATH.split(os.pathsep))
 
         if not hook_search_paths:
-            this._log.warning(
-                'Hook search paths are not provided. '
-                'Check if \'BD_HOOKPATH\' environment variable exists'
+            logger.warning(
+                "Hook search paths are not provided. "
+                "Check if 'BD_HOOKPATH' environment variable exists"
             )
             return
 
-        this._registry = registry.HookRegistry()
+        _registry = registry.HookRegistry()
 
     if hook_search_paths:
-        loader.load(this._registry, hook_search_paths)
+        loader.load(_registry, hook_search_paths)
 
 
-def execute(hook_name, *args, **kwargs):
+def execute(hook_uid, *args, **kwargs):
     """
-    Get all hook items registered under the specified hook name
+    Get all hook items registered under the specified hook uid
     and prepare a HookExecutor object with the provided arguments.
 
     Args:
-        hook_name (str): A hook name.
+        hook_uid: A hook identifier.
         *args: Variable length argument list.
         **kwargs: Arbitrary keyword arguments.
 
@@ -60,12 +61,12 @@ def execute(hook_name, *args, **kwargs):
         bd.hooks.executor.HookExecutor: hook executor object.
 
     """
-    if this._registry is None:
+    if _registry is None:
         raise HooksNotLoadedError()
 
-    hook_items = this._registry.get_hooks(hook_name)
+    hook_items = _registry.get_hooks(hook_uid)
     return executor.HookExecutor(hook_items, *args, **kwargs)
 
 
 def get_active_registry():
-    return this._registry
+    return _registry

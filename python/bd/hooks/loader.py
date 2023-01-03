@@ -1,9 +1,10 @@
 import os
 import logging
 
-from ._vendor.pluginbase import PluginBase
+import importlib.machinery
+import importlib.util
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def get_searchpath(root_dir):
@@ -40,17 +41,15 @@ def load(registry, hook_search_paths):
 
     """
     if not hook_search_paths:
-        LOGGER.warning(
-            'Hook search paths are not provided.'
-        )
+        logger.warning("Hook search paths are not provided.")
         return
 
     # keep only existing search paths
     existing_hook_search_paths = list(filter(os.path.exists, hook_search_paths))
 
     if not existing_hook_search_paths:
-        LOGGER.warning(
-            'There is no existing search paths in the list: {}'.format(
+        logger.warning(
+            "There is no existing search paths in the list: {}".format(
                 existing_hook_search_paths
             )
         )
@@ -62,43 +61,54 @@ def load(registry, hook_search_paths):
         try:
             deep_search_paths.extend(get_searchpath(hook_search_path))
         except OSError as e:
-            LOGGER.warning(
-                'There are some os errors on search path lookup: {}'.format(str(e))
+            logger.warning(
+                "There are some os errors on search path lookup: {}".format(str(e))
             )
             continue
 
     if not deep_search_paths:
         return
 
-    plugin_base = PluginBase(package="bd.hooks")
+    for hook_search_path in deep_search_paths:
 
-    plugin_source = plugin_base.make_plugin_source(
-        searchpath=deep_search_paths,
-        persist=True
-    )
+        for filename in os.listdir(hook_search_path):
 
-    for plugin_name in plugin_source.list_plugins():
-        try:
-            plugin = plugin_source.load_plugin(plugin_name)
-        except Exception as e:
-            LOGGER.warning(
-                'Hook \'{path}\' failed to load. {exc_msg}'.format(
-                    path=plugin_name,
-                    exc_msg=str(e)
+            if not filename.endswith(".py"):
+                continue
+
+            module_path = os.path.join(hook_search_path, filename)
+
+            module_name = filename.rsplit(".", 1)[0]
+
+            loader = importlib.machinery.SourceFileLoader(module_name, module_path)
+
+            spec = importlib.util.spec_from_loader(module_name, loader)
+            if not spec:
+                continue
+
+            module = importlib.util.module_from_spec(spec)
+
+            try:
+                loader.exec_module(module)
+            except Exception as e:
+                logger.warning(
+                    "Hook '{path}' failed to load. {exc_msg}".format(
+                        path=module_path, exc_msg=str(e)
+                    )
                 )
-            )
-            continue
+                continue
 
-        if not hasattr(plugin, 'register'):
-            LOGGER.warning('Missing \'register\' function in module \'{}\''.format(plugin_name))
-            continue
-
-        try:
-            plugin.register(registry)
-        except Exception as e:
-            LOGGER.warning(
-                'Failed to register hook from \'{path}\'. {exc_msg}'.format(
-                    path=plugin_name,
-                    exc_msg=str(e)
+            if not hasattr(module, "register"):
+                logger.warning(
+                    "Missing 'register' function in '{}'".format(module_path)
                 )
-            )
+                continue
+
+            try:
+                module.register(registry)
+            except Exception as e:
+                logger.exception(
+                    "Failed to register hook from '{path}'. {exc_msg}".format(
+                        path=module_path, exc_msg=str(e)
+                    )
+                )
