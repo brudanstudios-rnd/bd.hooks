@@ -1,5 +1,6 @@
 __all__ = ["HookRegistry"]
 
+import sys
 import uuid
 import logging
 import inspect
@@ -59,12 +60,14 @@ class HookItem(object):
         except CallbackExecutionError as e:
             raise
         except Exception as e:
+            _type, _, traceback = sys.exc_info()
             raise CallbackExecutionError(
+                f"({_type.__name__}) {str(e)}",
                 details={
                     "hook_item": self,
                     "source_exception": e,
                 },
-            ) from e
+            ).with_traceback(traceback) from None
 
     def __str__(self):
         return repr(self)
