@@ -35,9 +35,6 @@ class HookExecutionControl:
         if callable(self._on_released_callback):
             self._on_released_callback()
 
-    def __del__(self):
-        self.release()
-
 
 class HookExecutor(object):
     """This class allows user to choose how to execute the hooks."""
@@ -98,11 +95,13 @@ class HookExecutor(object):
             try:
                 try:
                     result = callback(hook_control=control)
+                    is_control_handled = True
                 except CallbackExecutionError as e:
                     if str(e).endswith(
                         "got an unexpected keyword argument 'hook_control'"
                     ):
                         result = callback()
+                        is_control_handled = False
                     else:
                         raise
             except CallbackExecutionError as e:
@@ -114,6 +113,9 @@ class HookExecutor(object):
             else:
                 if callable(result_callback):
                     result_callback(result)
+
+                if not is_control_handled:
+                    control.release()
 
         _go_next()
 
