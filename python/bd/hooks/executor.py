@@ -106,7 +106,7 @@ class HookExecutor(object):
                         raise
             except CallbackExecutionError as e:
                 if safe_execute:
-                    logger.warning(e)
+                    logger.exception(e)
                 else:
                     raise
 
