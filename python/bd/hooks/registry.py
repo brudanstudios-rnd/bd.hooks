@@ -91,7 +91,6 @@ class HookRegistry(object):
     """
 
     def __init__(self):
-
         # maps hook uid to all the registered hook items for that uid
         self._data = {}
 
@@ -118,11 +117,7 @@ class HookRegistry(object):
 
         if not callable(callback):
             raise InvalidCallbackError(
-                details={
-                    "hook_uid": uid,
-                    "module_path": filename,
-                    "callback": str(callback),
-                }
+                f"Invalid callback '{filename}:{str(callback)}' provided for '{uid}' hook"
             )
 
         logger.debug("Registering item for '{}' hook...".format(uid))
@@ -159,7 +154,7 @@ class HookRegistry(object):
         """
         hooks = self._data.get(uid)
         if not hooks:
-            raise HookNotFoundError(details={"hook_uid": uid})
+            raise HookNotFoundError(f"Unable to find a hook '{uid}'")
 
         if uid not in self._sorted:
             hooks.sort(key=lambda h: h.priority, reverse=True)

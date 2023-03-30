@@ -28,7 +28,6 @@ def load(hook_search_paths=None):
     global _registry
 
     if _registry is None:
-
         # extract search paths from environment variable
         BD_HOOKPATH = os.getenv("BD_HOOKPATH")
         if BD_HOOKPATH:
@@ -62,7 +61,9 @@ def execute(hook_uid, *args, **kwargs):
 
     """
     if _registry is None:
-        raise HooksNotLoadedError()
+        raise HooksNotLoadedError(
+            "Hook Registry not initialized. Possible cause: 'load' function not called. "
+        )
 
     hook_items = _registry.get_hooks(hook_uid)
     return executor.HookExecutor(hook_items, *args, **kwargs)
